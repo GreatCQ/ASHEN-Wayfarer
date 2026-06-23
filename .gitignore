@@ -10,3 +10,6 @@ desktop.ini
 *.swp
 *.swo
 *~
+
+# Word临时锁文件
+~$*
