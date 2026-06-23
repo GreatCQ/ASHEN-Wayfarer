@@ -1,0 +1,12 @@
+# WorkBuddy internal
+.workbuddy/
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Editor
+*.swp
+*.swo
+*~
