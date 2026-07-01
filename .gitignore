@@ -1,15 +1,44 @@
-# WorkBuddy internal
+﻿# ===== WorkBuddy internal =====
 .workbuddy/
 
-# OS
+# ===== OS =====
 Thumbs.db
 .DS_Store
 desktop.ini
+$RECYCLE.BIN/
 
-# Editor
+# ===== Editor =====
 *.swp
 *.swo
 *~
-
-# Word临时锁文件
 ~$*
+
+# ===== Unreal Engine 编译产物（绝不上传）=====
+game/ValidateProject/Binaries/
+game/ValidateProject/Build/
+game/ValidateProject/DerivedDataCache/
+game/ValidateProject/Intermediate/
+game/ValidateProject/Saved/
+game/ValidateProject/.vs/
+game/*/Plugins/*/Binaries/
+game/*/Plugins/*/Intermediate/
+
+# ===== Visual Studio =====
+.vs/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.user
+*.opendb
+
+# ===== IDE / AI 缓存 =====
+.idea/
+.ai-cache/
+
+# ===== 个人本地文件 =====
+notes/
+drafts/
+tasks/.local/
