@@ -42,3 +42,6 @@ game/*/Plugins/*/Intermediate/
 notes/
 drafts/
 tasks/.local/
+
+# 个人测试文件
+GreatQ_text
