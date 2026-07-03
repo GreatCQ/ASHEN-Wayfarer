@@ -1,4 +1,4 @@
-﻿# ===== ASHEN 远行者 · Git LFS 配置 =====
+# ===== ASHEN 远行者 · Git LFS 配置 =====
 
 # UE5 资产
 *.uasset filter=lfs diff=lfs merge=lfs -text
