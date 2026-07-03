@@ -20,7 +20,10 @@ class VALIDATEPROJECT_API AAshenPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	// DEMO 默认输入映射上下文（在编辑器里赋值 IMC_Ashen 资产）
+	// 构造函数: 自动按固定路径加载 IMC_Ashen，免去建 PlayerController 蓝图
+	AAshenPlayerController();
+
+	// DEMO 默认输入映射上下文（构造函数自动加载 /Game/Input/IMC_Ashen；也可在编辑器覆盖）
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "输入（Input）")
 	TObjectPtr<UInputMappingContext> DefaultMappingContext = nullptr;
 

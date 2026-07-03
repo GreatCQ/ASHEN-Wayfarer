@@ -9,6 +9,7 @@
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "TimerManager.h"
+#include "UObject/ConstructorHelpers.h"
 
 AAshenCharacter::AAshenCharacter()
 {
@@ -49,6 +50,17 @@ AAshenCharacter::AAshenCharacter()
 	SideViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("SideViewCamera"));
 	SideViewCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	SideViewCamera->bUsePawnControlRotation = false;
+
+	// ── 自动加载输入动作（免去建蓝图手动赋值） ──
+	// 你只需在 Content/Input/ 下建同名 IA 资产即可自动引用；找不到为 null，不崩溃。
+	static ConstructorHelpers::FObjectFinder<UInputAction> MoveFinder(TEXT("/Game/Input/IA_Move.IA_Move"));
+	if (MoveFinder.Succeeded()) { MoveAction = MoveFinder.Object; }
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> JumpFinder(TEXT("/Game/Input/IA_Jump.IA_Jump"));
+	if (JumpFinder.Succeeded()) { JumpAction = JumpFinder.Object; }
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> DodgeFinder(TEXT("/Game/Input/IA_Dodge.IA_Dodge"));
+	if (DodgeFinder.Succeeded()) { DodgeAction = DodgeFinder.Object; }
 }
 
 void AAshenCharacter::BeginPlay()
