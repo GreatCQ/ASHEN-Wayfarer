@@ -36,6 +36,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "摄像机（Camera）")
 	TObjectPtr<UCameraComponent> SideViewCamera;
 
+	// 摄像机与角色的距离（越大画面越远，横版建议 800~1500）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "摄像机（Camera）")
+	float CameraDistance = 900.f;
+
+	// 网格体基础朝向 Yaw（角色朝右时 Mesh 的 Yaw；若美术资产默认朝向不同请改此值）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "横版（SideScroll）")
+	float BaseMeshYaw = 0.f;
+
 	// ── 输入动作（编辑器里赋 IA 资产） ──────────────
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "输入（Input）")
 	TObjectPtr<UInputAction> MoveAction;
@@ -84,6 +92,9 @@ protected:
 	void OnMove(const FInputActionValue& Value);
 	void OnJump(const FInputActionValue& Value);
 	void OnDodge(const FInputActionValue& Value);
+
+	// 更新横版翻面（仅转网格体，不动摄像机）
+	void UpdateFacing();
 
 	// 闪避计时结束回调
 	void EndDodge();

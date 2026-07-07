@@ -38,18 +38,25 @@ AAshenCharacter::AAshenCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	// ── 摄像机: 侧视横版 ──
+	// ── 摄像机: 固定侧视横版（关键：绝对旋转，永不随角色翻面而转） ──
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 800.f;
+	CameraBoom->TargetArmLength = CameraDistance;
 	CameraBoom->bDoCollisionTest = false;
 	CameraBoom->bUsePawnControlRotation = false;
-	// 摄像机放在角色侧面（沿 -Y 看向角色），形成横版视角
-	CameraBoom->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+	CameraBoom->bEnableCameraLag = false;
+	// 关键: 绝对旋转 —— 弹簧臂朝向锁死世界坐标, 无视角色/父级怎么转,
+	// 保证角色左右翻面时视角永远从固定侧面(沿世界 -Y 看向 +Y)拍摄。
+	CameraBoom->bUsePawnControlRotation = false;
+	CameraBoom->SetUsingAbsoluteRotation(true);
+	// 沿世界 -Y 方向看向角色所在的 X-Z 平面: Yaw = -90° 使镜头看向 +Y。
+	CameraBoom->SetWorldRotation(FRotator(0.f, -90.f, 0.f));
 
 	SideViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("SideViewCamera"));
 	SideViewCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	SideViewCamera->bUsePawnControlRotation = false;
+	// 正交投影更贴近纯 2D 横版观感（可改回 Perspective 保留景深）。
+	// 默认保留透视, 制作人可在编辑器细节面板切换 ProjectionMode。
 
 	// ── 自动加载输入动作（免去建蓝图手动赋值） ──
 	// 你只需在 Content/Input/ 下建同名 IA 资产即可自动引用；找不到为 null，不崩溃。
@@ -106,10 +113,11 @@ void AAshenCharacter::OnMove(const FInputActionValue& Value)
 	// 沿世界 X 轴移动
 	AddMovementInput(FVector(1.f, 0.f, 0.f), AxisValue);
 
-	// 记录朝向并翻转角色面向（横版翻面）
+	// 记录朝向并翻转「网格体」面向（横版翻面）。
+	// 关键: 只转 Mesh, 不转整个 Actor —— 否则会把摄像机也一起甩到背面,
+	// 导致视角随移动翻转, 破坏固定横版观感。
 	LastFacingSign = (AxisValue > 0.f) ? 1.f : -1.f;
-	const float YawFacing = (AxisValue > 0.f) ? 0.f : 180.f;
-	SetActorRotation(FRotator(0.f, YawFacing, 0.f));
+	UpdateFacing();
 }
 
 void AAshenCharacter::OnJump(const FInputActionValue& /*Value*/)
@@ -139,6 +147,18 @@ void AAshenCharacter::OnDodge(const FInputActionValue& /*Value*/)
 	GetWorldTimerManager().SetTimer(DodgeTimerHandle, this, &AAshenCharacter::EndDodge, DodgeDuration, false);
 	GetWorldTimerManager().SetTimer(InvincibleTimerHandle, this, &AAshenCharacter::EndInvincible, InvincibleDuration, false);
 	GetWorldTimerManager().SetTimer(CooldownTimerHandle, this, &AAshenCharacter::ResetDodgeCooldown, DodgeCooldown, false);
+}
+
+void AAshenCharacter::UpdateFacing()
+{
+	// 横版翻面: 仅旋转网格体, 不动 Actor/摄像机。
+	// 朝右 = Mesh 面向 +X (Yaw 0), 朝左 = 面向 -X (Yaw 180)。
+	// 注意基础网格默认朝向可能是 -X, 若美术资产朝向不同, 调整 BaseMeshYaw 即可。
+	if (USkeletalMeshComponent* MeshComp = GetMesh())
+	{
+		const float YawFacing = (LastFacingSign > 0.f) ? BaseMeshYaw : (BaseMeshYaw + 180.f);
+		MeshComp->SetWorldRotation(FRotator(0.f, YawFacing, 0.f));
+	}
 }
 
 void AAshenCharacter::EndDodge()
